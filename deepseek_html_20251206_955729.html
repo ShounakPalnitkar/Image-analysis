@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Install Smart Plate AI PWA</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #4a6fa5;
+            --pwa-color: #673ab7;
+            --install-color: #ff6b6b;
+            --success-color: #28a745;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+        
+        .install-header {
+            background: linear-gradient(135deg, var(--pwa-color) 0%, #9575cd 100%);
+            color: white;
+            padding: 3rem 1rem;
+            text-align: center;
+            border-radius: 0 0 30px 30px;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(103, 58, 183, 0.3);
+        }
+        
+        .install-card {
+            background: white;
+            border-radius: 20px;
+            padding: 2.5rem;
+            margin: 2rem auto;
+            max-width: 500px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            border: 2px solid var(--pwa-color);
+            text-align: center;
+        }
+        
+        .qr-install-container {
+            padding: 2rem;
+            background: #f8f9fa;
+            border-radius: 15px;
+            margin: 2rem 0;
+            border: 3px dashed var(--pwa-color);
+        }
+        
+        #qrcode {
+            display: inline-block;
+            padding: 20px;
+            background: white;
+            border-radius: 15px;
+            margin: 20px 0;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            border: 3px solid var(--pwa-color);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        #qrcode:hover {
+            transform: scale(1.05);
+            box-shadow: 0 15px 35px rgba(103, 58, 183, 0.3);
+        }
+        
+        .install-btn {
+            background: linear-gradient(135deg, var(--install-color) 0%, #ff8e8e 100%);
+            color: white;
+            border: none;
+            padding: 18px 30px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1.2rem;
+            width: 100%;
+            margin: 20px 0;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .install-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(255, 107, 107, 0.4);
+        }
+        
+        .install-btn-success {
+            background: linear-gradient(135deg, var(--success-color) 0%, #20c997 100%);
+        }
+        
+        .install-steps {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 2rem auto;
+            max-width: 800px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .step-card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 25px;
+            margin: 20px 0;
+            border-left: 5px solid var(--pwa-color);
+            transition: transform 0.3s;
+        }
+        
+        .step-card:hover {
+            transform: translateX(10px);
+        }
+        
+        .step-number {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            background: var(--pwa-color);
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 40px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-right: 15px;
+        }
+        
+        .device-specific {
+            background: #e3f2fd;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+        
+        .device-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+        }
+        
+        .ios-icon { color: #000000; }
+        .android-icon { color: #3ddc84; }
+        .desktop-icon { color: #4285f4; }
+        
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(103, 58, 183, 0.4); }
+            70% { box-shadow: 0 0 0 15px rgba(103, 58, 183, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(103, 58, 183, 0); }
+        }
+        
+        .badge-install {
+            background: var(--install-color);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        .qr-instructions {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="install-header">
+        <h1><i class="fas fa-download"></i> Install Smart Plate AI</h1>
+        <p class="lead">Get our nutrition app on your home screen</p>
+        <span class="badge-install">PWA - No App Store Needed</span>
+    </div>
+    
+    <!-- Main Install Card -->
+    <div class="install-card">
+        <h2><i class="fas fa-qrcode"></i> Scan to Install</h2>
+        <p class="text-muted">Point your phone camera at the QR code below</p>
+        
+        <div class="qr-install-container">
+            <!-- QR Code Container -->
+            <div id="qrcode" class="pulse-animation"></div>
+            
+            <p class="text-muted">
+                <i class="fas fa-info-circle"></i> 
+                QR Code contains installation instructions
+            </p>
+            
+            <!-- Direct Install Button -->
+            <button class="install-btn" id="directInstallBtn" onclick="startInstallation()">
+                <i class="fas fa-mobile-alt"></i>
+                INSTALL APP NOW
+            </button>
+            
+            <!-- Alternative Link -->
+            <div class="input-group mt-3">
+                <input type="text" class="form-control" id="installUrl" 
+                       value="https://pwa-nutrition.onrender.com" readonly>
+                <button class="btn btn-primary" type="button" onclick="copyInstallUrl()">
+                    <i class="fas fa-copy"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div class="qr-instructions">
+            <h5><i class="fas fa-lightbulb"></i> How it works:</h5>
+            <p>Scanning the QR code will open our PWA with installation prompts.</p>
+            <p class="mb-0"><strong>Tip:</strong> Look for "Add to Home Screen" in your browser menu.</p>
+        </div>
+    </div>
+    
+    <!-- Installation Steps -->
+    <div class="install-steps">
+        <h2 class="text-center mb-4"><i class="fas fa-list-ol"></i> Installation Guide</h2>
+        
+        <div class="step-card">
+            <div>
+                <span class="step-number">1</span>
+                <strong>Scan QR Code</strong>
+            </div>
+            <p>Use your phone's camera to scan the QR code above.</p>
+        </div>
+        
+        <div class="step-card">
+            <div>
+                <span class="step-number">2</span>
+                <strong>Open in Browser</strong>
+            </div>
+            <p>Tap the link that appears after scanning to open our PWA.</p>
+        </div>
+        
+        <div class="step-card">
+            <div>
+                <span class="step-number">3</span>
+                <strong>Install Prompt</strong>
+            </div>
+            <p>Look for the install prompt or browser menu option to install.</p>
+        </div>
+        
+        <!-- Device Specific Instructions -->
+        <div class="row mt-4">
+            <div class="col-md-4">
+                <div class="device-specific text-center">
+                    <i class="fab fa-apple device-icon ios-icon"></i>
+                    <h5>iPhone/iPad</h5>
+                    <p>Tap <i class="fas fa-share"></i> → "Add to Home Screen"</p>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="device-specific text-center">
+                    <i class="fab fa-android device-icon android-icon"></i>
+                    <h5>Android</h5>
+                    <p>Tap ⋮ Menu → "Install app"</p>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="device-specific text-center">
+                    <i class="fas fa-desktop device-icon desktop-icon"></i>
+                    <h5>Desktop</h5>
+                    <p>Click <i class="fas fa-plus"></i> in address bar</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Benefits Section -->
+    <div class="install-steps">
+        <h2 class="text-center mb-4"><i class="fas fa-gift"></i> Why Install?</h2>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="step-card">
+                    <i class="fas fa-rocket text-primary fa-2x mb-3"></i>
+                    <h5>Fast Loading</h5>
+                    <p>Works instantly like a native app</p>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="step-card">
+                    <i class="fas fa-wifi-slash text-primary fa-2x mb-3"></i>
+                    <h5>Offline Access</h5>
+                    <p>Use without internet connection</p>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="step-card">
+                    <i class="fas fa-bell text-primary fa-2x mb-3"></i>
+                    <h5>Notifications</h5>
+                    <p>Get meal reminders and updates</p>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="step-card">
+                    <i class="fas fa-sync-alt text-primary fa-2x mb-3"></i>
+                    <h5>Auto Updates</h5>
+                    <p>Always have the latest features</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Test Section -->
+    <div class="install-card">
+        <h2 class="text-center mb-4"><i class="fas fa-vial"></i> Test Installation</h2>
+        
+        <div class="text-center">
+            <button class="btn btn-outline-success btn-lg mb-3" onclick="testInstallation()">
+                <i class="fas fa-check-circle"></i> Test PWA Installation
+            </button>
+            
+            <div id="testResult" class="mt-3" style="display: none;">
+                <div class="alert alert-success">
+                    <h5><i class="fas fa-check"></i> Installation Ready!</h5>
+                    <p id="testMessage">Your device supports PWA installation</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // ============================================
+        // CONFIGURATION
+        // ============================================
+        const PWA_URL = "https://pwa-nutrition.onrender.com";
+        // ============================================
+        
+        // Store deferred prompt for later use
+        let deferredPrompt;
+        
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            generateInstallQR();
+            setupInstallListener();
+            detectPWAfeatures();
+            
+            // Show welcome message
+            setTimeout(() => {
+                toastr.info('Scan the QR code with your phone camera to install the app!');
+            }, 1000);
+        });
+        
+        // Generate QR code with installation instructions
+        function generateInstallQR() {
+            try {
+                // Create a special installation URL
+                const installURL = PWA_URL + "?utm_source=qr&utm_medium=install&utm_campaign=pwa_install";
+                
+                // Generate QR code
+                new QRCode(document.getElementById("qrcode"), {
+                    text: installURL,
+                    width: 280,
+                    height: 280,
+                    colorDark: "#673ab7",
+                    colorLight: "#ffffff",
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+                
+                // Update install URL display
+                document.getElementById('installUrl').value = installURL;
+                
+                // Add click handler to QR code
+                document.getElementById('qrcode').addEventListener('click', function() {
+                    toastr.info('Opening installation page...');
+                    setTimeout(() => {
+                        window.open(installURL, '_blank');
+                    }, 500);
+                });
+                
+                console.log('✅ Installation QR generated:', installURL);
+                
+            } catch (error) {
+                console.error('❌ QR generation failed:', error);
+                document.getElementById('qrcode').innerHTML = 
+                    '<div class="alert alert-danger">QR Code Error: ' + error.message + '</div>';
+            }
+        }
+        
+        // Setup PWA install listener
+        function setupInstallListener() {
+            window.addEventListener('beforeinstallprompt', (e) => {
+                // Prevent Chrome 67 and earlier from automatically showing the prompt
+                e.preventDefault();
+                
+                // Stash the event so it can be triggered later
+                deferredPrompt = e;
+                
+                // Update UI to notify the user they can install the PWA
+                console.log('📱 PWA installation available');
+                
+                // Update install button
+                const installBtn = document.getElementById('directInstallBtn');
+                installBtn.innerHTML = '<i class="fas fa-download"></i> INSTALL NOW (Available)';
+                installBtn.classList.add('install-btn-success');
+                
+                // Show notification
+                toastr.success('Installation available! Click "Install Now"');
+                
+                // Log for debugging
+                console.log('🎯 PWA install prompt captured');
+            });
+            
+            // Track successful installation
+            window.addEventListener('appinstalled', (evt) => {
+                console.log('🎉 PWA was installed');
+                deferredPrompt = null;
+                
+                // Update button
+                const installBtn = document.getElementById('directInstallBtn');
+                installBtn.innerHTML = '<i class="fas fa-check"></i> INSTALLED SUCCESSFULLY';
+                installBtn.disabled = true;
+                installBtn.style.background = '#28a745';
+                
+                // Show success message
+                toastr.success('App installed successfully! Check your home screen.');
+                
+                // Redirect to app after installation
+                setTimeout(() => {
+                    window.open(PWA_URL, '_blank');
+                }, 1500);
+            });
+        }
+        
+        // Start installation process
+        function startInstallation() {
+            if (deferredPrompt) {
+                // Show the install prompt
+                deferredPrompt.prompt();
+                
+                // Wait for the user to respond to the prompt
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('✅ User accepted the install prompt');
+                        toastr.success('Installation started...');
+                    } else {
+                        console.log('❌ User dismissed the install prompt');
+                        toastr.info('Installation cancelled. You can install later from browser menu.');
+                        
+                        // Show manual installation instructions
+                        showManualInstall();
+                    }
+                    deferredPrompt = null;
+                });
+            } else {
+                // No install prompt available (desktop or already installed)
+                openPWAforInstall();
+            }
+        }
+        
+        // Open PWA for manual installation
+        function openPWAforInstall() {
+            toastr.info('Opening app for installation...');
+            
+            // Open PWA in new tab
+            const installWindow = window.open(PWA_URL, '_blank');
+            
+            // Show instructions after opening
+            setTimeout(() => {
+                if (isMobile()) {
+                    const device = getDeviceType();
+                    let instructions = '';
+                    
+                    if (device === 'ios') {
+                        instructions = 'Tap the Share button (📤) then "Add to Home Screen"';
+                    } else if (device === 'android') {
+                        instructions = 'Tap the menu (⋮) then "Install app" or "Add to Home Screen"';
+                    } else {
+                        instructions = 'Look for install option in your browser menu';
+                    }
+                    
+                    toastr.info(instructions, 'Installation Instructions');
+                } else {
+                    toastr.info('Look for the install icon in your browser address bar', 'Desktop Installation');
+                }
+            }, 2000);
+        }
+        
+        // Show manual installation instructions
+        function showManualInstall() {
+            const device = getDeviceType();
+            let instructions = '';
+            
+            switch(device) {
+                case 'ios':
+                    instructions = `
+                        <strong>iPhone/iPad Manual Installation:</strong>
+                        <ol>
+                            <li>Open Safari browser</li>
+                            <li>Go to: ${PWA_URL}</li>
+                            <li>Tap the Share button (📤)</li>
+                            <li>Scroll down and tap "Add to Home Screen"</li>
+                            <li>Tap "Add" in top right</li>
+                        </ol>
+                    `;
+                    break;
+                    
+                case 'android':
+                    instructions = `
+                        <strong>Android Manual Installation:</strong>
+                        <ol>
+                            <li>Open Chrome browser</li>
+                            <li>Go to: ${PWA_URL}</li>
+                            <li>Tap the menu (⋮) in top right</li>
+                            <li>Tap "Install app" or "Add to Home Screen"</li>
+                            <li>Follow the prompts</li>
+                        </ol>
+                    `;
+                    break;
+                    
+                default:
+                    instructions = `
+                        <strong>Manual Installation:</strong>
+                        <ol>
+                            <li>Go to: ${PWA_URL}</li>
+                            <li>Look for install icon in address bar</li>
+                            <li>Or check browser menu for "Install" option</li>
+                        </ol>
+                    `;
+            }
+            
+            // Create modal or alert with instructions
+            alert(instructions.replace(/<[^>]*>/g, ''));
+        }
+        
+        // Test PWA installation features
+        function testInstallation() {
+            const testResult = document.getElementById('testResult');
+            const testMessage = document.getElementById('testMessage');
+            
+            let results = [];
+            
+            // Test 1: HTTPS
+            if (PWA_URL.startsWith('https://')) {
+                results.push('✅ HTTPS secure connection');
+            } else {
+                results.push('❌ Requires HTTPS for installation');
+            }
+            
+            // Test 2: Service worker support
+            if ('serviceWorker' in navigator) {
+                results.push('✅ Service Worker supported');
+            } else {
+                results.push('⚠️ Limited PWA support');
+            }
+            
+            // Test 3: Install prompt support
+            if (deferredPrompt) {
+                results.push('✅ Automatic installation available');
+            }
+            
+            // Test 4: Standalone mode
+            if (window.matchMedia('(display-mode: standalone)').matches) {
+                results.push('✅ Already installed as PWA');
+            }
+            
+            // Test 5: Platform detection
+            const device = getDeviceType();
+            results.push(`✅ Detected: ${device.toUpperCase()}`);
+            
+            // Display results
+            testMessage.innerHTML = results.map(r => `<div class="mb-2">${r}</div>`).join('');
+            testResult.style.display = 'block';
+            
+            toastr.success('Installation test completed');
+        }
+        
+        // Copy install URL
+        function copyInstallUrl() {
+            const url = document.getElementById('installUrl').value;
+            navigator.clipboard.writeText(url)
+                .then(() => toastr.success('Install URL copied!'))
+                .catch(() => {
+                    // Fallback
+                    document.getElementById('installUrl').select();
+                    document.execCommand('copy');
+                    toastr.success('URL copied!');
+                });
+        }
+        
+        // Detect PWA features
+        function detectPWAfeatures() {
+            const features = {
+                serviceWorker: 'serviceWorker' in navigator,
+                manifest: 'manifest' in document,
+                standalone: window.matchMedia('(display-mode: standalone)').matches,
+                beforeinstallprompt: 'beforeinstallprompt' in window
+            };
+            
+            console.log('🔍 PWA Features:', features);
+            
+            // If already installed as PWA
+            if (features.standalone) {
+                const installBtn = document.getElementById('directInstallBtn');
+                installBtn.innerHTML = '<i class="fas fa-check"></i> ALREADY INSTALLED';
+                installBtn.disabled = true;
+                installBtn.style.background = '#6c757d';
+                
+                toastr.info('App is already installed on your device');
+            }
+        }
+        
+        // Get device type
+        function getDeviceType() {
+            const ua = navigator.userAgent;
+            if (/iPad|iPhone|iPod/.test(ua)) return 'ios';
+            if (/Android/.test(ua)) return 'android';
+            return 'desktop';
+        }
+        
+        // Check if mobile
+        function isMobile() {
+            return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+        }
+        
+        // Toastr configuration
+        toastr.options = {
+            "closeButton": true,
+            "progressBar": true,
+            "positionClass": "toast-top-right",
+            "timeOut": "4000",
+            "extendedTimeOut": "1000"
+        };
+    </script>
+</body>
+</html>
